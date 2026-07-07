@@ -1,4 +1,12 @@
-# Day 1 (bonus): answer questions about a text using the Gemini API
+"""
+Answers a student's questions about a text file (input.txt) using the Gemini
+API. Not limited to the text -- the model can also draw on its own broader
+knowledge to give a fuller answer.
+
+Requires a .env file with GEMINI_API_KEY set.
+Run: python answer_question.py
+Type 'exit' to quit.
+"""
 
 import os
 from dotenv import load_dotenv

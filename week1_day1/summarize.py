@@ -1,4 +1,9 @@
-# Day 1: summarize a text using the Gemini API
+"""
+Summarizes a text file (input.txt) into 2-3 sentences using the Gemini API.
+
+Requires a .env file with GEMINI_API_KEY set.
+Run: python summarize.py
+"""
 
 import os
 from dotenv import load_dotenv

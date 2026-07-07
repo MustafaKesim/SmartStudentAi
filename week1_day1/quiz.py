@@ -1,4 +1,10 @@
-# Day 2 (bonus): generate quiz questions from a text using the Gemini API
+"""
+Generates multiple-choice quiz questions from a text file (input.txt)
+using the Gemini API.
+
+Requires a .env file with GEMINI_API_KEY set.
+Run: python quiz.py
+"""
 
 import os
 from dotenv import load_dotenv
