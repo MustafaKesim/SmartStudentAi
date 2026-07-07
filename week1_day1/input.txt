@@ -1,19 +1,11 @@
-Formula 1 (F1) is the world's top-tier open-wheel, single-seater racing car championship. Supervised by the International Automobile Federation (FIA), it is generally considered the pinnacle of motorsport.
+The FIFA World Cup is an international football tournament contested by the senior men's national teams of the members of the Federation Internationale
+ de Football Association (FIFA). The tournament has been held every four years since 1930, except in 1942 and 1946 when it was not held because of the 
+ Second World War.
 
-Formula 1
-+1
-Key Features
-Cars: These specially manufactured cars are extremely lightweight, aerodynamic, and can reach speeds of 360 km/h. Races: Each race, called a "Grand Prix," is held on private racetracks or street circuits around the world. Championships: Throughout a season, drivers accumulate points for the "Drivers' Championship," and teams for the "Constructors' Championship."
+The competition consists of two parts: the qualification phase and the final phase, officially called the World Cup Finals. The qualification phase, 
+which currently takes place over the preceding three years, is used to determine which teams qualify for the final phase. In the final phase, 32 teams 
+compete for the title at venues within the host nation over about a month.
 
-Wikipedia
-+3
-How the Weekend Goes?
-Practice: Free practice laps are held on Friday and Saturday to adjust the cars.
-Qualifying: On Saturday, qualifying laps are held to determine the starting grid for Sunday's race. Race: This is the main event held on Sundays and concludes with the cars covering a distance of approximately 305 km (excluding Monaco).
-
-Red Bull
-+1
-If you want to get started in the world of Formula 1, would you like me to explain the following?
-Getting to know the current teams and drivers
-Learning about the scoring system used in races
-Discovering what the flags and basic rules mean
+Brazil is the most successful national team, having won the tournament five times. Other former champions include Germany and Italy, with four titles 
+each, and Argentina and France, with two titles each. The World Cup is the most prestigious association football tournament in the world, as well as 
+the most widely viewed and followed single sporting event in the world.
