@@ -1,4 +1,4 @@
-# Day 1 (bonus): generate quiz questions from a text using the Gemini API
+# Day 2 (bonus): generate quiz questions from a text using the Gemini API
 
 import os
 from dotenv import load_dotenv
