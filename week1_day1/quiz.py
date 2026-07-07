@@ -1,4 +1,4 @@
-# Week 1, Day 1 (bonus): Generate quiz questions from a text using the Gemini API
+# Week 1, Day 2: Generate quiz questions from a text using the Gemini API
 # We will fill this in step by step.
 
 import os
