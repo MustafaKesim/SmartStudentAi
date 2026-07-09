@@ -9,3 +9,8 @@ venv/
 
 # Claude Code local settings
 .claude/
+
+# Day-by-day learning exercises (kept locally, not part of the actual project)
+week2_day1/
+week2_day2/
+week2_day3/

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Student Assistant</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    section {
+      margin-bottom: 30px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    #result {
+      white-space: pre-wrap;
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Smart Student Assistant</h1>
+
+  <section>
+    <h2>1. Upload a PDF</h2>
+    <input type="file" id="pdfFile" accept="application/pdf">
+    <button id="uploadButton">Upload</button>
+    <p id="uploadStatus"></p>
+  </section>
+
+  <section>
+    <h2>2. Summarize</h2>
+    <button id="summarizeButton">Summarize</button>
+  </section>
+
+  <h2>Result</h2>
+  <div id="result">Nothing here yet.</div>
+
+  <script>
+    document.getElementById("uploadButton").addEventListener("click", async () => {
+      const fileInput = document.getElementById("pdfFile");
+      const file = fileInput.files[0];
+
+      if (!file) {
+        document.getElementById("uploadStatus").innerText = "Please choose a file first.";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      document.getElementById("uploadStatus").innerText =
+        data.message + " (" + data.characters_extracted + " characters extracted)";
+    });
+
+    document.getElementById("summarizeButton").addEventListener("click", async () => {
+      const response = await fetch("/summarize", { method: "POST" });
+      const data = await response.json();
+      document.getElementById("result").innerText = data.summary;
+    });
+  </script>
+</body>
+</html>
