@@ -14,3 +14,7 @@ venv/
 week2_day1/
 week2_day2/
 week2_day3/
+
+# Local test/scratch scripts, not part of the actual project
+backend/db_test.py
+tempCodeRunnerFile.python

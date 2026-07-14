@@ -1,6 +1,8 @@
 """
-Minimal FastAPI app to confirm the server runs.
+Smart Student Assistant backend: upload a PDF and get a summary, ask
+questions about it, or generate a quiz from it, using the Gemini API.
 
+Requires a .env file with GEMINI_API_KEY set.
 Run: uvicorn main:app --reload
 """
 
@@ -44,7 +46,15 @@ async def upload_pdf(file:UploadFile):
 
 @app.post("/summarize")
 def summarize():
-    prompt = f"Summarize the following text in 2-3 sentences:\n\n{document_text}"
+    prompt = f"""You are a study assistant helping a student review their lecture material.
+
+Here is the material:
+{document_text}
+
+Write a clear, well-organized summary (around one short paragraph, roughly
+5-6 sentences) covering the main topics and key points. It should be enough
+for the student to understand what the material is about, without going into
+every detail."""
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
@@ -83,7 +93,7 @@ def generate_quiz():
 Here is the material to base the quiz on:
 {document_text}
 
-Generate 3 multiple-choice questions based on this material.
+Generate 5 multiple-choice questions based on this material.
 Each question should have 4 options labeled A, B, C, D.
 After each question, clearly indicate the correct answer."""
 

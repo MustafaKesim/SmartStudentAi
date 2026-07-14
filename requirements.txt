@@ -4,3 +4,4 @@ pypdf
 fastapi
 uvicorn
 python-multipart
+psycopg2-binary
