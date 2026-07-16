@@ -2,124 +2,38 @@
 Smart Student Assistant backend: upload a PDF and get a summary, ask
 questions about it, or generate a quiz from it, using the Gemini API.
 
-Requires a .env file with GEMINI_API_KEY set.
+Requires a .env file with GEMINI_API_KEY and the DB_* PostgreSQL variables
+set (see database.py).
 Run: uvicorn main:app --reload
 """
 
 import os
-import secrets
-from dotenv import load_dotenv
-from google import genai
-from google.genai import types
-from google.genai import errors as genai_errors
-from fastapi import FastAPI,UploadFile,Request,Response,HTTPException
+from fastapi import FastAPI, UploadFile, Request, Response, HTTPException
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from fastapi.staticfiles import StaticFiles
 from pypdf import PdfReader
-import psycopg2
+from google.genai import types
 import io
 
-load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key)
+from ai import generate_content
+from chunking import PAGE_DELIMITER, compute_chunks
+from database import get_connection
+from session import get_owner_id, get_current_document
+from models import (
+    SummarizePartRequest,
+    QuestionRequest,
+    QuizResponse,
+    ActivateConversationRequest,
+)
 
 app = FastAPI()
 
-
-def generate_content(**kwargs):
-    """Calls Gemini and turns known API errors into a clear, friendly
-    HTTPException instead of letting a raw 500 reach the browser."""
-    try:
-        return client.models.generate_content(**kwargs)
-    except genai_errors.APIError as e:
-        if e.code == 429:
-            raise HTTPException(
-                status_code=429,
-                detail="You've hit Gemini's rate limit. Please wait about a minute and try again.",
-            )
-        raise HTTPException(
-            status_code=503,
-            detail="The AI service is currently busy or unavailable. Please try again in a moment.",
-        )
-
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Pages are stored joined by this marker so we can still split the document
-# back into individual pages later (for page-range summaries), while /ask
-# and /quiz can just strip it out and use the whole text.
-PAGE_DELIMITER = "\n\n<<<PAGE_BREAK>>>\n\n"
+# Serves style.css and app.js directly, so index.html can link/script to
+# them under /static/... instead of everything being inlined in one file.
+app.mount("/static", StaticFiles(directory=os.path.join(script_dir, "static")), name="static")
 
-
-def compute_chunks(total_pages):
-    """Split a document's pages into study-sized chunks: 2 chunks if the
-    whole thing is 20 pages or less, otherwise ~10 pages per chunk. Returns
-    a list of (start_page, end_page) tuples, 0-indexed and end-exclusive."""
-    if total_pages <= 20:
-        chunk_count = 2
-    else:
-        chunk_count = -(-total_pages // 10)  # ceiling division
-    chunk_count = max(1, min(chunk_count, total_pages))
-
-    base_size = total_pages // chunk_count
-    remainder = total_pages % chunk_count
-
-    chunks = []
-    start = 0
-    for i in range(chunk_count):
-        size = base_size + (1 if i < remainder else 0)
-        chunks.append((start, start + size))
-        start += size
-    return chunks
-
-
-def get_connection():
-    return psycopg2.connect(
-        host=os.getenv("DB_HOST"),
-        port=os.getenv("DB_PORT"),
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-    )
-
-
-def get_owner_id(request:Request,response:Response):
-    req=request.cookies.get("session_id")
-    if req is None:
-        req=secrets.token_hex(16)
-        response.set_cookie("session_id", req, httponly=True)
-    owner_id=req
-    return owner_id
-
-
-def get_current_document(request: Request, owner_id: str):
-    """Find the most recently uploaded document in the current conversation,
-    but only if that conversation actually belongs to this owner_id.
-    Raises an error if there's no active conversation or no document yet."""
-    conversation_id = request.cookies.get("conversation_id")
-    if conversation_id is None:
-        raise HTTPException(status_code=400, detail="Please upload a PDF first.")
-
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        SELECT documents.id, documents.content
-        FROM documents
-        JOIN conversations ON conversations.id = documents.conversation_id
-        WHERE documents.conversation_id = %s AND conversations.owner_id = %s
-        ORDER BY documents.uploaded_at DESC LIMIT 1
-        """,
-        (conversation_id, owner_id),
-    )
-    row = cur.fetchone()
-    cur.close()
-    conn.close()
-
-    if row is None:
-        raise HTTPException(status_code=400, detail="Please upload a PDF first.")
-
-    document_id, content = row
-    return document_id, content
 
 @app.get("/")
 def serve_frontend():
@@ -127,7 +41,7 @@ def serve_frontend():
 
 
 @app.post("/upload")
-async def upload_pdf(file:UploadFile,request:Request,response:Response):
+async def upload_pdf(file: UploadFile, request: Request, response: Response):
     owner_id = get_owner_id(request, response)
     contents = await file.read()
     reader = PdfReader(io.BytesIO(contents))
@@ -166,10 +80,6 @@ async def upload_pdf(file:UploadFile,request:Request,response:Response):
     conn.close()
 
     return {"message": "File uploaded successfully", "characters_extracted": len(text)}
-
-
-class SummarizePartRequest(BaseModel):
-    part_index: int
 
 
 @app.post("/summarize-part")
@@ -236,14 +146,12 @@ number of sentences -- cover everything meaningful in this section."""
     }
 
 
-class QuestionRequest(BaseModel):
-    question: str
-
-
 @app.post("/ask")
 def ask_question(body: QuestionRequest, request: Request, response: Response):
     owner_id = get_owner_id(request, response)
     document_id, content = get_current_document(request, owner_id)
+    # /ask always sees the whole document, so the page-chunk markers (only
+    # meaningful to the Summarize feature) would just be noise here.
     content = content.replace(PAGE_DELIMITER, "\n\n")
 
     prompt = f"""You are a study assistant helping a student understand their course material.
@@ -274,18 +182,6 @@ to give the most helpful and accurate answer."""
     conn.close()
 
     return {"answer": ai_response.text}
-
-class QuizQuestion(BaseModel):
-    question: str
-    option_a: str
-    option_b: str
-    option_c: str
-    option_d: str
-    correct_answer: str
-
-
-class QuizResponse(BaseModel):
-    questions: list[QuizQuestion]
 
 
 @app.post("/quiz")
@@ -329,10 +225,6 @@ should have exactly 4 options, and correct_answer must be exactly one of:
 def new_chat(response: Response):
     response.delete_cookie("conversation_id")
     return {"message": "Started a new chat"}
-
-
-class ActivateConversationRequest(BaseModel):
-    conversation_id: int
 
 
 @app.post("/activate-conversation")
@@ -379,6 +271,10 @@ def history(request: Request, response: Response):
     cur.close()
     conn.close()
 
+    # The query returns one row per result (a conversation with 3 results
+    # comes back as 3 rows, each repeating the conversation's title) --
+    # group them back into one entry per conversation, with its results
+    # nested underneath, which is what the frontend actually wants to render.
     conversations = {}
     for conv_id, title, file_name, result_type, question, part_index, output, created_at in rows:
         if conv_id not in conversations:
