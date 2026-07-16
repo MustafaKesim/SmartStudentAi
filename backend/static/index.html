@@ -1,185 +1,887 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Smart Student Assistant</title>
-  <style>
-    :root {
-      --primary: #4f46e5;
-      --primary-dark: #4338ca;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --border: #e2e8f0;
-      --text: #1e293b;
-      --text-muted: #64748b;
-    }
+<meta charset="UTF-8">
+<title>Smart Student Assistant</title>
+<style>
+  :root {
+    --bg: #f6f7fb;
+    --surface: #ffffff;
+    --surface-sunken: #eef0f7;
+    --text: #191b2a;
+    --text-muted: #6b7086;
+    --text-faint: #9498ab;
+    --border: #e3e5ef;
+    --accent: #4f46e5;
+    --accent-hover: #423ac7;
+    --accent-wash: #eeecfd;
+    --success: #1e8e5a;
+    --success-wash: #e7f5ee;
+    --danger: #c0392b;
+    --danger-wash: #fbeae8;
+    --shadow: 0 1px 2px rgba(25, 27, 42, 0.04), 0 8px 24px rgba(25, 27, 42, 0.06);
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  }
 
-    * {
-      box-sizing: border-box;
-    }
+  * { box-sizing: border-box; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      max-width: 640px;
-      margin: 0 auto;
-      padding: 48px 20px;
-      background: var(--bg);
-      color: var(--text);
-    }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+  }
 
-    h1 {
-      text-align: center;
-      font-size: 1.8rem;
-      margin: 0 0 6px 0;
-    }
+  button { font-family: inherit; }
 
-    .subtitle {
-      text-align: center;
-      color: var(--text-muted);
-      margin: 0 0 32px 0;
-    }
+  .app-shell {
+    display: grid;
+    grid-template-columns: 270px 1fr;
+    min-height: 100vh;
+  }
 
-    section {
-      background: var(--card-bg);
-      margin-bottom: 20px;
-      padding: 20px 24px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    }
+  /* ---------- Sidebar ---------- */
 
-    section h2 {
-      font-size: 0.85rem;
-      margin: 0 0 14px 0;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
+  .sidebar {
+    background: var(--surface-sunken);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px 14px;
+    gap: 20px;
+  }
 
-    input[type="text"],
-    input[type="file"] {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.95rem;
-      margin-bottom: 12px;
-      font-family: inherit;
-    }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 0 4px;
+  }
 
-    button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s ease;
-    }
+  .brand svg { flex: none; }
 
-    button:hover {
-      background: var(--primary-dark);
-    }
+  .brand-name {
+    font-weight: 700;
+    font-size: 14.5px;
+    letter-spacing: -0.01em;
+  }
 
-    #uploadStatus {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      margin: 10px 0 0 0;
-    }
+  .new-chat-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
 
-    #result {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      padding: 20px 24px;
-      border-radius: 12px;
-      line-height: 1.6;
-    }
-  </style>
+  .new-chat-btn:hover { background: var(--accent-hover); }
+
+  .sidebar-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+    padding: 0 8px;
+    margin: 0;
+  }
+
+  .history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+  }
+
+  .history-empty {
+    font-size: 13px;
+    color: var(--text-faint);
+    padding: 8px;
+  }
+
+  .history-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 10px;
+    cursor: pointer;
+    transition: background 0.12s ease;
+    font-family: inherit;
+  }
+
+  .history-item:hover { background: var(--border); }
+  .history-item.active { background: var(--accent-wash); }
+
+  .history-item-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .history-item.active .history-item-title { color: var(--accent); }
+
+  /* ---------- Main ---------- */
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .tabbar {
+    display: flex;
+    gap: 4px;
+    padding: 16px 28px 0;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 10px 14px 12px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .panel {
+    flex: 1;
+    padding: 26px 28px;
+    overflow-y: auto;
+    display: none;
+  }
+
+  .panel.active { display: block; }
+
+  .panel-intro { max-width: 680px; margin: 0 0 20px; }
+
+  .panel-eyebrow {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin: 0 0 6px;
+  }
+
+  .panel-title {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+  }
+
+  .panel-desc { font-size: 13.5px; color: var(--text-muted); margin: 0; }
+
+  /* Upload */
+
+  .dropzone {
+    max-width: 640px;
+    border: 1.5px dashed var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    padding: 32px 24px;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .dropzone:hover { border-color: var(--accent); }
+
+  .dropzone-title { font-weight: 700; font-size: 14.5px; margin: 0 0 4px; }
+  .dropzone-hint { font-size: 13px; color: var(--text-muted); margin: 0; }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    padding: 10px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+  .btn-primary:disabled { opacity: 0.5; cursor: default; }
+
+  .secondary-button {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 9px 15px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .secondary-button:hover:not(:disabled) { background: var(--bg); }
+  .secondary-button:disabled { opacity: 0.4; cursor: default; }
+
+  .file-card {
+    max-width: 640px;
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--success-wash);
+    border: 1px solid var(--success);
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+
+  .file-card-icon { color: var(--success); flex: none; }
+  .file-card-name { font-size: 13.5px; font-weight: 600; }
+  .file-card-meta { font-size: 12px; color: var(--text-muted); }
+
+  /* Reading content */
+
+  .result-entry { max-width: 680px; margin-bottom: 22px; }
+  .result-entry:last-child { margin-bottom: 0; }
+
+  .result-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin: 0 0 2px;
+  }
+
+  .result-meta { font-size: 12px; color: var(--text-faint); margin: 0 0 8px; }
+
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .result-body {
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .result-body p { margin: 0 0 14px; }
+  .result-body p:last-child { margin-bottom: 0; }
+  .result-body ol, .result-body ul { padding-left: 22px; }
+  .result-body li { margin-bottom: 6px; }
+  .result-body pre { background: var(--bg); padding: 12px; border-radius: 8px; overflow-x: auto; }
+
+  /* Summarize */
+
+  .summarize-nav {
+    max-width: 680px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .summarize-part-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-align: center;
+    flex: 1;
+  }
+
+  /* Ask */
+
+  .ask-input-row { max-width: 640px; display: flex; gap: 10px; margin-bottom: 22px; }
+
+  .ask-input {
+    flex: 1;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    font-family: inherit;
+    color: var(--text);
+  }
+
+  .qa-question {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 12px 12px 2px 12px;
+    padding: 9px 14px;
+    font-size: 13.5px;
+    font-weight: 500;
+    margin: 0 0 8px;
+    max-width: 80%;
+  }
+
+  /* Quiz */
+
+  .quiz-question { max-width: 680px; margin-bottom: 22px; }
+  .quiz-question:last-child { margin-bottom: 0; }
+
+  .quiz-question-text {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 10px;
+  }
+
+  .quiz-options { display: flex; flex-direction: column; gap: 7px; }
+
+  .quiz-option {
+    font-family: var(--serif);
+    font-size: 14.5px;
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    padding: 9px 13px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .quiz-option:hover:not(:disabled) { border-color: var(--accent); }
+  .quiz-option:disabled { cursor: default; }
+
+  .quiz-option.correct { border-color: var(--success); background: var(--success-wash); }
+  .quiz-option.incorrect { border-color: var(--danger); background: var(--danger-wash); }
+
+  .quiz-option-letter {
+    font-family: var(--sans);
+    font-weight: 700;
+    color: var(--text-faint);
+    flex: none;
+  }
+
+  .quiz-option.correct .quiz-option-letter { color: var(--success); }
+  .quiz-option.incorrect .quiz-option-letter { color: var(--danger); }
+
+  @media (max-width: 760px) {
+    .app-shell { grid-template-columns: 1fr; }
+    .sidebar { flex-direction: row; overflow-x: auto; align-items: center; }
+    .history-list { flex-direction: row; }
+    .tabbar { padding: 12px 16px 0; }
+    .panel { padding: 18px 16px; }
+  }
+</style>
 </head>
 <body>
-  <h1>Smart Student Assistant</h1>
-  <p class="subtitle">Upload your lecture notes and get summaries, answers, and quizzes.</p>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="24" height="24" rx="7" fill="#4f46e5"/>
+          <path d="M12 6.5L5 9.5L12 12.5L19 9.5L12 6.5Z" fill="white"/>
+          <path d="M8 11V15C8 15 9.5 16.5 12 16.5C14.5 16.5 16 15 16 15V11" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="brand-name">Smart Student Assistant</div>
+      </div>
 
-  <section>
-    <h2>1. Upload a PDF</h2>
-    <input type="file" id="pdfFile" accept="application/pdf">
-    <button id="uploadButton">Upload</button>
-    <p id="uploadStatus"></p>
-  </section>
+      <button class="new-chat-btn" id="newChatButton" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg>
+        New chat
+      </button>
 
-  <section>
-    <h2>2. Summarize</h2>
-    <button id="summarizeButton">Summarize</button>
-  </section>
+      <p class="sidebar-section-label">History</p>
+      <ul class="history-list" id="historyList">
+        <li class="history-empty">Loading&hellip;</li>
+      </ul>
+    </aside>
 
-  <section>
-    <h2>3. Ask a question</h2>
-    <input type="text" id="questionInput" placeholder="Type your question here">
-    <button id="askButton">Ask</button>
-  </section>
+    <main class="main">
+      <nav class="tabbar">
+        <button class="tab active" data-tab="upload" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16V18C4 19.1 4.9 20 6 20H18C19.1 20 20 19.1 20 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Upload
+        </button>
+        <button class="tab" data-tab="summarize" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M6 4H14L19 9V20H6V4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 12H15M9 15.5H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Summarize
+        </button>
+        <button class="tab" data-tab="ask" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="2"/><path d="M9.7 9.2C9.9 8 11 7.3 12.2 7.5C13.3 7.7 14.1 8.6 14 9.7C13.9 10.9 12.4 11.2 12.1 12.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="15.7" r="1" fill="currentColor"/></svg>
+          Ask a question
+        </button>
+        <button class="tab" data-tab="quiz" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="2"/><path d="M8 9H16M8 12.5H16M8 16H12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Generate quiz
+        </button>
+      </nav>
 
-  <section>
-    <h2>4. Generate a quiz</h2>
-    <button id="quizButton">Generate Quiz</button>
-  </section>
+      <!-- Upload -->
+      <section class="panel active" id="panel-upload">
+        <div class="panel-intro">
+          <p class="panel-eyebrow">Step 1</p>
+          <h1 class="panel-title">Upload your lecture notes</h1>
+          <p class="panel-desc">Add a PDF to this chat. You can upload more than one file to the same conversation.</p>
+        </div>
+        <div class="dropzone" id="dropzone">
+          <p class="dropzone-title" id="dropzoneTitle">Click to choose a PDF</p>
+          <p class="dropzone-hint" id="dropzoneHint">or drag one here</p>
+          <input type="file" id="pdfFile" accept="application/pdf" style="display:none;">
+        </div>
+        <div style="max-width:640px; display:flex; align-items:center; gap:12px; margin-top:14px;">
+          <button class="btn-primary" id="uploadButton" type="button">Upload</button>
+          <span id="uploadStatusText" style="font-size:13px; color:var(--text-muted);"></span>
+        </div>
+        <div class="file-card" id="fileCard" style="display:none;">
+          <svg class="file-card-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 12.5L10.5 15L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div>
+            <div class="file-card-name" id="fileCardName"></div>
+            <div class="file-card-meta" id="fileCardMeta"></div>
+          </div>
+        </div>
+      </section>
 
-  <h2 style="color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 10px 4px;">Result</h2>
-  <div id="result">Nothing here yet.</div>
+      <!-- Summarize -->
+      <section class="panel" id="panel-summarize">
+        <div class="panel-intro">
+          <p class="panel-eyebrow">Step 2</p>
+          <h1 class="panel-title">Summarize</h1>
+          <p class="panel-desc">Read through your material one section at a time -- click Next once you understand a section.</p>
+        </div>
+        <div class="summarize-nav">
+          <button class="secondary-button" id="summarizeBackBtn" type="button" disabled>&larr; Back</button>
+          <span class="summarize-part-label" id="summarizePartLabel">Not started yet</span>
+          <button class="btn-primary" id="summarizeNextBtn" type="button">Next &rarr;</button>
+        </div>
+        <div class="result-card">
+          <div class="result-body" id="summarizeContent">
+            <p>Upload a PDF, then click &ldquo;Next&rdquo; to start reading through it section by section.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ask -->
+      <section class="panel" id="panel-ask">
+        <div class="panel-intro">
+          <p class="panel-eyebrow">Step 3</p>
+          <h1 class="panel-title">Ask a question</h1>
+          <p class="panel-desc">Ask anything about the uploaded material -- answers use it as context, but aren't limited to it.</p>
+        </div>
+        <div class="ask-input-row">
+          <input class="ask-input" type="text" id="questionInput" placeholder="Type your question here">
+          <button class="btn-primary" id="askButton" type="button">Ask</button>
+        </div>
+        <div id="askResults"></div>
+      </section>
+
+      <!-- Quiz -->
+      <section class="panel" id="panel-quiz">
+        <div class="panel-intro">
+          <p class="panel-eyebrow">Step 4</p>
+          <h1 class="panel-title">Generate a quiz</h1>
+          <p class="panel-desc">Five multiple-choice questions generated from the uploaded material. Click an option to answer.</p>
+        </div>
+        <button class="btn-primary" id="quizButton" type="button">Generate quiz</button>
+        <div id="quizResult" style="margin-top:22px;"></div>
+      </section>
+
+      <!-- History detail (populated dynamically) -->
+      <section class="panel" id="panel-history"></section>
+    </main>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
-    function showResult(text) {
-      document.getElementById("result").innerHTML = marked.parse(text);
+    // Escapes text that came from user-controlled data (like an uploaded
+    // file's name, or a typed question) before inserting it into HTML, so it
+    // can't be used to inject a script (XSS). Never skip this for such text.
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
     }
 
+    // Reads the friendly error message our backend sends (e.g. "You've hit
+    // Gemini's rate limit...") out of a failed response, with a generic
+    // fallback if something else entirely went wrong.
+    async function getErrorMessage(res) {
+      try {
+        const data = await res.json();
+        return data.detail || "Something went wrong. Please try again.";
+      } catch {
+        return "Something went wrong. Please try again.";
+      }
+    }
+
+    function switchPanel(panelId) {
+      document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+      document.getElementById(panelId).classList.add("active");
+    }
+
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+        document.querySelectorAll(".history-item").forEach((h) => h.classList.remove("active"));
+        tab.classList.add("active");
+        switchPanel("panel-" + tab.dataset.tab);
+      });
+    });
+
+    /* ---------------- Upload ---------------- */
+
+    const pdfFileInput = document.getElementById("pdfFile");
+
+    document.getElementById("dropzone").addEventListener("click", () => pdfFileInput.click());
+
+    pdfFileInput.addEventListener("change", () => {
+      const file = pdfFileInput.files[0];
+      document.getElementById("dropzoneTitle").innerText = file ? file.name : "Click to choose a PDF";
+      document.getElementById("dropzoneHint").innerText = file ? "Click Upload to add it to this chat" : "or drag one here";
+    });
+
     document.getElementById("uploadButton").addEventListener("click", async () => {
-      const fileInput = document.getElementById("pdfFile");
-      const file = fileInput.files[0];
+      const file = pdfFileInput.files[0];
+      const statusEl = document.getElementById("uploadStatusText");
 
       if (!file) {
-        document.getElementById("uploadStatus").innerText = "Please choose a file first.";
+        statusEl.innerText = "Please choose a file first.";
         return;
       }
+
+      statusEl.innerText = "Uploading...";
 
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("/upload", {
+      const res = await fetch("/upload", { method: "POST", body: formData });
+
+      if (!res.ok) {
+        statusEl.innerText = await getErrorMessage(res);
+        return;
+      }
+
+      const data = await res.json();
+
+      statusEl.innerText = "";
+      document.getElementById("fileCard").style.display = "flex";
+      document.getElementById("fileCardName").innerText = file.name;
+      document.getElementById("fileCardMeta").innerText =
+        data.characters_extracted + " characters extracted";
+
+      // A new (or additional) document changes the page layout for the
+      // Summarize flow, so restart it.
+      resetSummarizeState();
+    });
+
+    /* ---------------- Summarize (paginated) ---------------- */
+
+    let summarizeState = { partIndex: -1, totalParts: null, cache: {} };
+
+    function resetSummarizeState() {
+      summarizeState = { partIndex: -1, totalParts: null, cache: {} };
+      document.getElementById("summarizePartLabel").innerText = "Not started yet";
+      document.getElementById("summarizeContent").innerHTML =
+        "<p>Click &ldquo;Next&rdquo; to start reading through your slides, section by section.</p>";
+      document.getElementById("summarizeBackBtn").disabled = true;
+      document.getElementById("summarizeNextBtn").innerText = "Next →";
+      document.getElementById("summarizeNextBtn").disabled = false;
+    }
+
+    function showSummarizePart(index, data) {
+      summarizeState.partIndex = index;
+      document.getElementById("summarizePartLabel").innerText =
+        "Part " + (index + 1) + " of " + summarizeState.totalParts +
+        " (pages " + data.start_page + "-" + data.end_page + ")";
+      document.getElementById("summarizeContent").innerHTML = marked.parse(data.summary);
+      document.getElementById("summarizeBackBtn").disabled = index <= 0;
+
+      const isLast = index >= summarizeState.totalParts - 1;
+      document.getElementById("summarizeNextBtn").innerText = isLast ? "Done" : "Next →";
+      document.getElementById("summarizeNextBtn").disabled = isLast;
+
+      refreshHistorySidebar();
+    }
+
+    async function loadSummarizePart(index) {
+      if (summarizeState.cache[index]) {
+        showSummarizePart(index, summarizeState.cache[index]);
+        return;
+      }
+
+      document.getElementById("summarizePartLabel").innerText = "Generating...";
+      document.getElementById("summarizeNextBtn").disabled = true;
+      document.getElementById("summarizeBackBtn").disabled = true;
+
+      const res = await fetch("/summarize-part", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ part_index: index }),
       });
 
-      const data = await response.json();
-      document.getElementById("uploadStatus").innerText =
-        data.message + " (" + data.characters_extracted + " characters extracted)";
+      if (!res.ok) {
+        document.getElementById("summarizeContent").innerHTML =
+          "<p>" + escapeHtml(await getErrorMessage(res)) + "</p>";
+        document.getElementById("summarizePartLabel").innerText = "Not started yet";
+        document.getElementById("summarizeNextBtn").disabled = false;
+        document.getElementById("summarizeBackBtn").disabled = index <= 0;
+        return;
+      }
+
+      const data = await res.json();
+      summarizeState.totalParts = data.total_parts;
+      summarizeState.cache[index] = data;
+      showSummarizePart(index, data);
+    }
+
+    document.getElementById("summarizeNextBtn").addEventListener("click", () => {
+      loadSummarizePart(summarizeState.partIndex + 1);
     });
 
-    document.getElementById("summarizeButton").addEventListener("click", async () => {
-      const response = await fetch("/summarize", { method: "POST" });
-      const data = await response.json();
-      showResult(data.summary);
+    document.getElementById("summarizeBackBtn").addEventListener("click", () => {
+      if (summarizeState.partIndex > 0) {
+        loadSummarizePart(summarizeState.partIndex - 1);
+      }
     });
+
+    /* ---------------- Ask ---------------- */
 
     document.getElementById("askButton").addEventListener("click", async () => {
-      const question = document.getElementById("questionInput").value;
+      const input = document.getElementById("questionInput");
+      const question = input.value.trim();
+      if (!question) return;
 
-      const response = await fetch("/ask", {
+      const res = await fetch("/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: question }),
       });
 
-      const data = await response.json();
-      showResult(data.answer);
+      const entry = document.createElement("div");
+      entry.className = "result-entry";
+
+      if (!res.ok) {
+        entry.innerHTML =
+          '<p class="qa-question">' + escapeHtml(question) + "</p>" +
+          '<div class="result-card"><div class="result-body">' + escapeHtml(await getErrorMessage(res)) + "</div></div>";
+        document.getElementById("askResults").prepend(entry);
+        return;
+      }
+
+      const data = await res.json();
+      entry.innerHTML =
+        '<p class="qa-question">' + escapeHtml(question) + "</p>" +
+        '<div class="result-card"><div class="result-body">' + marked.parse(data.answer) + "</div></div>";
+      document.getElementById("askResults").prepend(entry);
+
+      input.value = "";
+      refreshHistorySidebar();
     });
 
+    /* ---------------- Quiz ---------------- */
+
+    let quizCounter = 0;
+
+    // Builds the HTML for one quiz (without attaching click handlers yet --
+    // the container needs to actually exist in the page first).
+    function buildQuizHtml(quizData) {
+      quizCounter++;
+      const containerId = "quiz-" + quizCounter;
+      let html = '<div id="' + containerId + '">';
+      quizData.questions.forEach((q, qIndex) => {
+        html += '<div class="quiz-question" data-question-index="' + qIndex + '">';
+        html += '<p class="quiz-question-text">' + (qIndex + 1) + ". " + escapeHtml(q.question) + "</p>";
+        html += '<div class="quiz-options">';
+        ["a", "b", "c", "d"].forEach((letter) => {
+          const optionText = q["option_" + letter];
+          html += '<button type="button" class="quiz-option" data-letter="' + letter.toUpperCase() + '">';
+          html += '<span class="quiz-option-letter">' + letter.toUpperCase() + "</span><span>" + escapeHtml(optionText) + "</span>";
+          html += "</button>";
+        });
+        html += "</div></div>";
+      });
+      html += "</div>";
+      return { html: html, containerId: containerId };
+    }
+
+    // Wires up click-to-answer behavior for one quiz's buttons, once its
+    // HTML is actually in the page.
+    function attachQuizHandlers(containerId, quizData) {
+      const container = document.getElementById(containerId);
+      container.querySelectorAll(".quiz-question").forEach((questionEl) => {
+        const qIndex = questionEl.getAttribute("data-question-index");
+        const correctLetter = quizData.questions[qIndex].correct_answer;
+
+        questionEl.querySelectorAll(".quiz-option").forEach((optionButton) => {
+          optionButton.addEventListener("click", () => {
+            const chosenLetter = optionButton.getAttribute("data-letter");
+
+            questionEl.querySelectorAll(".quiz-option").forEach((btn) => {
+              btn.disabled = true;
+              if (btn.getAttribute("data-letter") === correctLetter) {
+                btn.classList.add("correct");
+              }
+            });
+
+            if (chosenLetter !== correctLetter) {
+              optionButton.classList.add("incorrect");
+            }
+          });
+        });
+      });
+    }
+
     document.getElementById("quizButton").addEventListener("click", async () => {
-      const response = await fetch("/quiz", { method: "POST" });
-      const data = await response.json();
-      showResult(data.quiz);
+      const res = await fetch("/quiz", { method: "POST" });
+
+      if (!res.ok) {
+        document.getElementById("quizResult").innerHTML =
+          "<p>" + escapeHtml(await getErrorMessage(res)) + "</p>";
+        return;
+      }
+
+      const data = await res.json();
+      const built = buildQuizHtml(data.quiz);
+      document.getElementById("quizResult").innerHTML = built.html;
+      attachQuizHandlers(built.containerId, data.quiz);
+      refreshHistorySidebar();
     });
+
+    /* ---------------- New chat ---------------- */
+
+    document.getElementById("newChatButton").addEventListener("click", async () => {
+      await fetch("/new-chat", { method: "POST" });
+
+      document.getElementById("uploadStatusText").innerText = "";
+      document.getElementById("fileCard").style.display = "none";
+      document.getElementById("dropzoneTitle").innerText = "Click to choose a PDF";
+      document.getElementById("dropzoneHint").innerText = "or drag one here";
+      pdfFileInput.value = "";
+
+      resetSummarizeState();
+      document.getElementById("askResults").innerHTML = "";
+      document.getElementById("quizResult").innerHTML = "";
+
+      document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+      document.querySelector('.tab[data-tab="upload"]').classList.add("active");
+      switchPanel("panel-upload");
+    });
+
+    /* ---------------- History (sidebar) ---------------- */
+
+    const typeLabels = { summary: "Summary", answer: "Question", quiz: "Quiz" };
+    let historyData = null;
+
+    async function refreshHistorySidebar() {
+      const res = await fetch("/history");
+      historyData = await res.json();
+      renderHistorySidebar();
+    }
+
+    function renderHistorySidebar() {
+      const list = document.getElementById("historyList");
+
+      if (!historyData || historyData.conversations.length === 0) {
+        list.innerHTML = '<li class="history-empty">No history yet</li>';
+        return;
+      }
+
+      list.innerHTML = "";
+      historyData.conversations.forEach((conversation, index) => {
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "history-item";
+        btn.innerHTML = '<div class="history-item-title">' + escapeHtml(conversation.title) + "</div>";
+        btn.addEventListener("click", () => openHistoryDetail(index));
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+    }
+
+    async function openHistoryDetail(index) {
+      const conversation = historyData.conversations[index];
+
+      // Make this the active conversation so the Upload/Summarize/Ask/Quiz
+      // tabs start operating on it -- exactly like the current chat. Already
+      // generated summary parts are cached in the database, so resuming
+      // Summarize on this conversation won't spend Gemini quota again.
+      await fetch("/activate-conversation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversation_id: conversation.id }),
+      });
+      resetSummarizeState();
+      document.getElementById("askResults").innerHTML = "";
+      document.getElementById("quizResult").innerHTML = "";
+
+      document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+      document.querySelectorAll(".history-item").forEach((h) => h.classList.remove("active"));
+      document.querySelectorAll(".history-item")[index].classList.add("active");
+
+      let html = '<div class="panel-intro"><p class="panel-eyebrow">History &middot; now active</p><h1 class="panel-title">' +
+        escapeHtml(conversation.title) + "</h1><p class=\"panel-desc\">This conversation is active again -- use the Summarize, Ask, or Quiz tabs to continue it.</p></div>";
+
+      const quizzesToWireUp = [];
+
+      conversation.results.forEach((result) => {
+        const label = result.question
+          ? typeLabels[result.type] + ": " + escapeHtml(result.question)
+          : typeLabels[result.type];
+        const time = new Date(result.created_at).toLocaleString();
+
+        html += '<div class="result-entry">';
+        html += '<p class="result-label">' + label + "</p>";
+        html += '<p class="result-meta">' + escapeHtml(result.file_name) + " &middot; " + time + "</p>";
+
+        if (result.type === "quiz") {
+          const quizData = JSON.parse(result.output);
+          const built = buildQuizHtml(quizData);
+          html += built.html;
+          quizzesToWireUp.push({ containerId: built.containerId, quizData: quizData });
+        } else {
+          html += '<div class="result-card"><div class="result-body">' + marked.parse(result.output) + "</div></div>";
+        }
+
+        html += "</div>";
+      });
+
+      document.getElementById("panel-history").innerHTML = html;
+      switchPanel("panel-history");
+
+      quizzesToWireUp.forEach((entry) => attachQuizHandlers(entry.containerId, entry.quizData));
+    }
+
+    refreshHistorySidebar();
   </script>
 </body>
 </html>
