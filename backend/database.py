@@ -22,8 +22,9 @@ def get_connection():
         dbname=os.getenv("DB_NAME"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        # "prefer" works against both our local WSL database (no SSL set up)
-        # and Neon (which requires SSL) without needing separate settings
-        # for each -- it uses SSL when the server offers it, plain otherwise.
-        sslmode="prefer",
+        # Local WSL Postgres has no SSL set up ("prefer" falls back to plain
+        # automatically), but Neon's pooler flatly rejects non-SSL
+        # connections rather than negotiating down -- so in production we
+        # set DB_SSLMODE=require as an extra environment variable.
+        sslmode=os.getenv("DB_SSLMODE", "prefer"),
     )
